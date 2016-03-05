@@ -16,7 +16,16 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+LIBNAME := DirectHW
 all: dmg
+
+userland: lib$(LIBNAME).dylib lib$(LIBNAME).a
+
+lib$(LIBNAME).dylib: DirectHW.c DirectHW.h
+	$(CC) DirectHW.c -dynamiclib -framework IOKit -o lib$(LIBNAME).dylib
+
+lib$(LIBNAME).a: DirectHW.c DirectHW.h
+	$(CC) -static -c DirectHW.c -o lib$(LIBNAME).a
 
 prepare:
 	if [ ! -r .patched ]; then \
@@ -58,11 +67,11 @@ installer: package
 	cp -r build/DirectHW.pkg ~/Desktop
 
 clean:
+	rm -rf out lib$(LIBNAME).dylib lib$(LIBNAME).a
 	sudo rm -rf build/Release build/DirectHW.build build/DirectHW build/DirectHW.pkg
-	rm -rf out
 
-distclean:
+distclean: clean
 	rm DirectHW.dmg
 
-.PHONY: prepare build install package dmg load copy clean distclean
+.PHONY: prepare build install package dmg load copy clean distclean userland
 
